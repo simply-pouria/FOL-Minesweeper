@@ -3,7 +3,23 @@ import time
 import random
 from pyDatalog import pyDatalog
 from src.minesweeper import MineSweeper
-
+from src.environment_manager import (
+    init_static_facts,
+    create_agent_board,
+    record_start_cell,
+    reveal_cell,
+    flag_cell,
+    unflag_cell,
+    get_hidden_neighbors,
+    get_flagged_neighbors,
+    get_revealed_neighbors,
+    is_hidden,
+    is_flagged,
+    is_revealed,
+    get_clue,
+    AGENT_UNKNOWN,
+    AGENT_FLAGGED,
+)
 # =========================================================================
 # Section 1: Define First-Order Logic Terms (FOL Terms)
 # Students should define the required terms, facts, and rules for pyDatalog here.
@@ -19,12 +35,6 @@ AGENT_FLAGGED = -2
 # Section 2: Generation of Logical Facts and Rules
 # =========================================================================
 
-def init_static_facts(rows, cols):
-    """
-    Task 1: Generate static facts at the beginning of the game 
-    (e.g., adjacency relationships between cells).
-    """
-    pass
 
 def init_rules():
     """
@@ -74,18 +84,9 @@ def prolog_solver(game):
     init_rules()
     
     # Create agent's internal memory (Shadow Board) - initially all cells are unknown
-    agent_board = {}
-    for r in range(game.rows):
-        for c in range(game.cols):
-            agent_board[(r, c)] = AGENT_UNKNOWN
-
-    # Get starting position (Guaranteed to be 0 and safe according to the project documentation)
-    start_r, start_c = game.get_start_pos()
+    agent_board = create_agent_board(game.rows, game.cols)
+    start_r, start_c = record_start_cell(game, agent_board)
     print(f"Starting at guaranteed safe position: {start_r}, {start_c}")
-    
-    # First move: Reveal the starting cell and record it in the agent's memory
-    start_val = game.reveal(start_r, start_c)
-    agent_board[(start_r, start_c)] = start_val if start_val is not None else 0
     
     running = True
     while running and not game.game_over:
